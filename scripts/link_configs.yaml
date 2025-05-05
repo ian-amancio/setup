@@ -1,0 +1,17 @@
+---
+- name: Create symlinks to my settings
+  hosts: localhost
+  vars:
+    src: "{{ lookup('env', 'HOME') }}/dev/setup/dotfiles"
+    dest: "{{ lookup('env', 'HOME') }}/.config"
+    configs:
+      - awesome
+
+  tasks:
+    - name: Create a symlink for each config
+      file:
+        src: "{{ src }}/{{ item }}"
+        dest: "{{ dest }}/{{ item }}"
+        state: link
+        force: false
+      loop: "{{ configs }}"
