@@ -1,14 +1,21 @@
 ---
-- name: Create symlinks to my settings
+- name: Setup
   hosts: localhost
+  become: yes
   vars:
     src: "{{ lookup('env', 'HOME') }}/dev/setup/dotfiles"
     dest: "{{ lookup('env', 'HOME') }}/.config"
     configs:
       - awesome
+      - picom.conf
 
   tasks:
-    - name: Create a symlink for each config
+    - name: Update Debian
+      apt:
+        update_cache: yes
+        upgrade: dist
+    # - name: Backup existing configs
+    - name: Create symlinks to my configs
       file:
         src: "{{ src }}/{{ item }}"
         dest: "{{ dest }}/{{ item }}"
