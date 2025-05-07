@@ -1,24 +1,45 @@
 ---
 - name: Setup
   hosts: localhost
-  become: yes
+  become: true
   vars:
-    src: "{{ lookup('env', 'HOME') }}/dev/setup/dotfiles"
-    dest: "{{ lookup('env', 'HOME') }}/.config"
-    configs:
+    my_base_path: "{{ lookup('env', 'HOME') }}/dev/setup/system_files"
+    my_config: "{{ my_base_path }}/config"
+    my_home: "{{ my_base_path }}/home"
+    system_config: "{{ lookup('env', 'HOME') }}/.config"
+    system_home: "{{ lookup('env', 'HOME') }}"
+    config_files:
       - awesome
       - picom.conf
+    home_files:
+      - .bashrc
 
   tasks:
     - name: Update Debian
-      apt:
-        update_cache: yes
+      ansible.builtin.apt:
+        update_cache: true
         upgrade: dist
-    # - name: Backup existing configs
-    - name: Create symlinks to my configs
-      file:
-        src: "{{ src }}/{{ item }}"
-        dest: "{{ dest }}/{{ item }}"
+
+    - name: Backup .config files
+      ansible.builtin.debug:
+        msg: "Backup .config files"
+
+    - name: Backup home files
+      ansible.builtin.debug:
+        msg: "Backup home files"
+
+    - name: Create symlinks in .config
+      ansible.builtin.file:
+        src: "{{ my_config }}/{{ item }}"
+        dest: "{{ system_config }}/{{ item }}"
         state: link
         force: false
-      loop: "{{ configs }}"
+      loop: "{{ config_files }}"
+
+    - name: Create symlinks in home
+      ansible.builtin.file:
+        src: "{{ my_home }}/{{ item }}"
+        dest: "{{ system_home }}/{{ item }}"
+        state: link
+        force: false
+      loop: "{{ home_files }}"
